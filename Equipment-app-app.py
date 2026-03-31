@@ -63,7 +63,44 @@ else:
         st.write(f"Zeige {len(df)} Ergebnisse")
         st.dataframe(df, use_container_width=True)
 
-    elif page == "Mein Profil":
-        st.title(f"Profil von {st.session_state.user}")
-        st.write("Hier kannst du deine eigenen Inserate verwalten.")
-        st.button("Neues Equipment hochladen")
+import streamlit as st
+from PIL import Image # Hilft beim Verarbeiten von Bildern
+
+st.title("➕ Neues Equipment vermieten")
+
+with st.form("upload_form", clear_on_submit=True):
+    # 1. Text-Infos
+    titel = st.text_input("Name des Equipments (z.B. Carbon Rennrad)")
+    beschreibung = st.text_area("Besonderheiten & Infos (Zustand, Größe, Zubehör...)")
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        kategorie = st.selectbox("Kategorie", ["Fahrrad", "Wassersport", "Wintersport", "Fitness"])
+    with col2:
+        preis = st.number_input("Preis pro Tag (€)", min_value=1)
+    
+    # 2. Bild-Upload
+    uploaded_file = st.file_uploader("Lade ein Foto hoch", type=["jpg", "jpeg", "png"])
+    
+    submitted = st.form_submit_button("Inserat jetzt live schalten")
+
+    if submitted:
+        if titel and uploaded_file:
+            # Bild anzeigen zur Bestätigung
+            image = Image.open(uploaded_file)
+            st.image(image, caption="Vorschau deines Equipments", width=300)
+            
+            # LOGIK ZUM SPEICHERN:
+            # Da die App live ist, müssten wir das Bild jetzt in einer Cloud 
+            # oder Datenbank speichern. Für den ersten Test fügen wir es 
+            # der Liste im aktuellen Programm-Lauf hinzu:
+            neues_item = {
+                "Name": titel,
+                "Kategorie": kategorie,
+                "Preis": preis,
+                "Beschreibung": beschreibung,
+                "Bild": image # In einer echten App speichern wir hier die URL zum Bild
+            }
+            st.success(f"Super! Dein {titel} ist jetzt (theoretisch) für andere sichtbar.")
+        else:
+            st.error("Bitte gib einen Namen an und lade ein Bild hoch!")
